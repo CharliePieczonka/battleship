@@ -3,10 +3,10 @@ import { Player } from "./player.js"
 
 const gameController = (function () {
     let ships = [5, 4, 3, 3, 2];
-    let player, computer;
+    let player1, computer;
 
     const startGame = () => {
-        player = new Player();
+        player1 = new Player();
         computer = new Player();
         populateComputerBoard();
     }
@@ -28,6 +28,7 @@ const gameController = (function () {
         }
 
         computer.board.printBoard();
+        displayController.renderComputerBoard(computer);
     }
 
     return { startGame, populateComputerBoard }
@@ -35,9 +36,42 @@ const gameController = (function () {
 
 
 const displayController = (function () {
+    let computerBoard = document.querySelector(".computer-board");
+    let playerBoard = document.querySelector(".player-board");
 
-});
+    const renderComputerBoard = (computer) => {
+        let size = computer.board.size;
+        for(let i = size-1; i >= 0; i--) {
+            let row = document.createElement("div");
+            row.setAttribute("class", "row");
+            row.setAttribute("id", "row-" + i);
+            
+            for(let j = 0; j < size; j++) {
+                let cell = document.createElement("div");
+                cell.setAttribute("class", "cell");
+                cell.setAttribute("id", "cell-" + i + "-" + j);
+
+                //cell.textContent = "cell-" + i + "-" + j;
+                cell.textContent = computer.board.coordinates[i][j];
+                if(cell.textContent === "0") {
+                    cell.textContent = "";
+                }
+                
+                row.appendChild(cell);
+            }
+
+            computerBoard.appendChild(row);
+        }
+    }
+
+    const testMethod = () => {
+        console.log("test success");
+    }
+
+    return { renderComputerBoard, testMethod }
+})();
 
 
 
 gameController.startGame();
+displayController.testMethod();
