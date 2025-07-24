@@ -4,6 +4,8 @@ class Gameboard {
     size = 10;
     coordinates = [];
     ships = [];
+    missed = [];
+    hits = [];
 
     constructor() {
         for(let i = 0; i < this.size; i++) {
@@ -54,6 +56,35 @@ class Gameboard {
 
         this.ships.push(ship);
         return "success";
+    }
+
+    receiveAttack(x, y) {
+        let shipID = this.coordinates[y][x];
+        if(shipID === 0) {
+            this.missed.push([y, x]);
+            return false;
+        }
+        else {
+            this.hits.push([y, x]);
+            this.ships[shipID - 1].numHits++;
+            return true;
+        }
+    }
+
+    isGameOver() {
+        let totalLength = 0;
+        let totalHits = 0;
+        this.ships.forEach(ship => {
+            totalLength += ship.length;
+            totalHits += ship.numHits;
+        });
+
+        if(totalHits >= totalLength) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     printBoard() {
