@@ -1,9 +1,11 @@
 class Ship {
+    id = 0;
     length = 0;
     numHits = 0;
     sunk = false;
 
-    constructor(length) {
+    constructor(id, length) {
+        this.id = id;
         this.length = length;
     }
     

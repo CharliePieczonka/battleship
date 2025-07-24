@@ -1,6 +1,6 @@
 import { Ship } from "./ship.js"
 
-let ship = new Ship(5)
+let ship = new Ship(0, 5)
 ship.hit()
 ship.hit()
 
@@ -12,7 +12,7 @@ test('isSunk is false when hits = 2 and length = 5', () => {
   expect(ship.isSunk()).toBeFalsy();
 });
 
-let ship2 = new Ship(3)
+let ship2 = new Ship(0, 3)
 ship2.hit()
 ship2.hit()
 ship2.hit()
