@@ -1,17 +1,43 @@
 import "./styles.css";
-import { Gameboard } from "./gameboard.js"
+import { Player } from "./player.js"
 
-let board = new Gameboard()
-console.log(board.playShip(5, 2, 3, "horizontal"));
-// console.log(board.playShip(4, 4, 2, "vertical"));
-// console.log(board.playShip(1, 7, 3, "vertical"));
+const gameController = (function () {
+    let ships = [5, 4, 3, 3, 2];
+    let player, computer;
 
-console.log("hit: " + board.receiveAttack(5, 2));
-console.log("hit: " + board.receiveAttack(6, 2));
-console.log("hit: " + board.receiveAttack(7, 2));
+    const startGame = () => {
+        player = new Player();
+        computer = new Player();
+        populateComputerBoard();
+    }
 
-console.log("is gameover? " + board.isGameOver());
+    const populateComputerBoard = () => {
+        console.log("populating computer board...")
+        let played = 0;
 
-console.log(board.ships[0].numHits)
+        while(played < ships.length) {
+            let orientations = ["horizontal", "vertical"];
+            let randomX = Math.floor(Math.random() * computer.board.size);
+            let randomY = Math.floor(Math.random() * computer.board.size);
+            let randomOrientation = Math.floor(Math.random() * 2);
 
-board.printBoard()
+            let success = computer.board.playShip(randomX, randomY, ships[played], orientations[randomOrientation]);
+            if(success === "success") {
+                played++;
+            }
+        }
+
+        computer.board.printBoard();
+    }
+
+    return { startGame, populateComputerBoard }
+})();
+
+
+const displayController = (function () {
+
+});
+
+
+
+gameController.startGame();
