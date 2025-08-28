@@ -59,13 +59,13 @@ class Gameboard {
     }
 
     receiveAttack(x, y) {
-        let shipID = this.coordinates[y][x];
+        let shipID = this.coordinates[x][y];
         if(shipID === 0) {
-            this.missed.push([y, x]);
+            this.missed.push([x, y]);
             return false;
         }
         else {
-            this.hits.push([y, x]);
+            this.hits.push([x, y]);
             this.ships[shipID - 1].numHits++;
             return true;
         }
