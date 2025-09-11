@@ -4,7 +4,7 @@ import { Player } from "./player.js"
 const gameController = (function () {
     let ships = [5, 4, 3, 3, 2];
     let player1, computer;
-    let isPlayerTurn;
+    let isPlayerTurn, isGameOver;
 
     const startGame = () => {
         player1 = new Player();
@@ -12,6 +12,7 @@ const gameController = (function () {
         populateComputerBoard();
 
         isPlayerTurn = true;
+        isGameOver = false;
         displayController.displayMessage("Player Turn");
     }
 
@@ -39,12 +40,14 @@ const gameController = (function () {
         cells.forEach(cell => {
             cell.addEventListener('click', () => {
                 console.log(`player clicked cell (${cell.getAttribute('data-row')}, ${cell.getAttribute('data-col')})`);
-                if(isPlayerTurn) playerTurn(cell.getAttribute('data-row'), cell.getAttribute('data-col'));
+                if(isPlayerTurn && !isGameOver) playerTurn(cell);
             });
         });
     }
 
-    const playerTurn = (row, col) => {
+    const playerTurn = (cell) => {
+        let row = cell.getAttribute('data-row');
+        let col = cell.getAttribute('data-col');
         let shipId = computer.board.coordinates[row][col];
         console.log(`computer's board (${row}, ${col}) = ${shipId}`)
 
@@ -58,13 +61,18 @@ const gameController = (function () {
 
                 if(computer.board.isGameOver()) {
                     displayController.displayMessage(`All computer ships have been sunk! You Win!`);
+                    isGameOver = true;
+                    displayController.displayReset();
                 }
 
                 computer.board.coordinates[row][col] = "x";
+                cell.textContent = "X";
+                cell.style.backgroundColor = "red";
             }
             else {
                 displayController.displayMessage('Miss.');
                 computer.board.coordinates[row][col] = "o";
+                cell.style.backgroundColor = "blue";
             }
 
             //isPlayerTurn = false;
@@ -72,7 +80,11 @@ const gameController = (function () {
         
     }
 
-    return { startGame, populateComputerBoard }
+    const resetGame = () => {
+
+    }
+
+    return { startGame, populateComputerBoard, resetGame }
 })();
 
 
@@ -111,17 +123,40 @@ const displayController = (function () {
     const displayMessage = (message) => {
         let newMsg = document.createElement("p");
         newMsg.innerText = message;
-        gameInfo.appendChild(newMsg);
+        gameInfo.prepend(newMsg);
     }
 
-    return { renderComputerBoard, displayMessage }
+    const displayReset = () => {
+        let resetButton = document.createElement("button");
+        resetButton.setAttribute("class", "game-button");
+        resetButton.setAttribute("id", "reset-button");
+        resetButton.textContent = "Reset Game";
+
+        resetButton.addEventListener("click", () => {
+            clearGameInfo();
+            clearComputerBoard();
+            //clearPlayerBoard();
+            gameController.startGame();
+        });
+
+        gameInfo.prepend(resetButton);
+    }
+
+    const clearGameInfo = () => {
+        gameInfo.innerHTML = "";
+    }
+
+    const clearComputerBoard = () => {
+        computerBoard.innerHTML = "";
+    }
+
+    return { renderComputerBoard, displayMessage, displayReset, clearGameInfo }
 })();
 
 let startButton = document.querySelector("#start-button")
 startButton.addEventListener("click", () => {
+    displayController.clearGameInfo();
     gameController.startGame();
-    let startInfoDiv = document.querySelector(".starting-info");
-    startInfoDiv.style.display = "none";
 });
 
 

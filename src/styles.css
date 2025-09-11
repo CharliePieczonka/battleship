@@ -12,12 +12,15 @@ body {
     padding: 0.5em;
 }
 
-#start-button {
+.game-button {
 
+}
+#main-title {
+    padding-bottom: 0.5em;
 }
 
 .game-info {
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 80vh;
 }
 
@@ -28,13 +31,14 @@ body {
 }
 
 .boards-container {
-    border: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
     display: grid;
     grid-template-rows: 1fr 1fr;
 }
 
 .computer-board-container {
-    border: 1px solid black;
+    border-bottom: 1px solid black;
     display: flex;
     justify-content: center;
 }
