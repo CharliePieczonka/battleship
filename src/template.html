@@ -9,13 +9,13 @@
 <body>
     <div class="main-container">
         <div class="left">
-            <h3 id="main-title">Battleship!</h3>
+            <h3 class="side-title">Battleship!</h3>
             <div class="game-info">
                 <p class="explanation">In battleship you and your opponent will each have 5 boats.</p> 
                 <p class="explanation">You will begin by placing your boats however you want in your grid, however they cannot overlap each other or overhang the grid.</p>
                 <p class="explanation">You will then take turns selecting a square on each others board, and it will reveal if you have hit a boat or just water.</p>
                 <p class="explanation">You continue until someone entire fleet has been sunk!</p>
-                <button id="start-button" class="game-button">Begin</button>
+                <button id="begin-button" class="game-button">Continue</button>
             </div>   
         </div>
         <div class="middle boards-container">
@@ -31,7 +31,134 @@
             </div>
         </div>
         <div class="right">
-
+            <h3 class="side-title">Ships</h3>
+            <div class="ships-container">
+                <div class="ship-container">
+                    <div class="ship-div">
+                        <h6>Carrier</h6>
+                        <div class="ship">
+                            <div class="ship-cell ship-cell-first"></div>
+                            <div class="ship-cell"></div>
+                            <div class="ship-cell"></div>
+                            <div class="ship-cell"></div>
+                            <div class="ship-cell"></div>
+                        </div>
+                    </div>
+                    <div class="coord-container">
+                        <div class="coord-div">
+                            <h6>X</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="carrier" coord="x" value="1" disabled/>
+                        </div>
+                        <div class="coord-div">
+                            <h6>Y</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="carrier" coord="y" value="1" disabled/>
+                        </div>
+                        <div class="rotate-div">
+                            <h6 style="color:white;">.</h6>
+                            <button class="rotate-button" ship="carrier" disabled>⟳</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ship-container">
+                    <div class="ship-div">
+                        <h6>Battleship</h6>
+                        <div class="ship">
+                            <div class="ship-cell ship-cell-first"></div>
+                            <div class="ship-cell"></div>
+                            <div class="ship-cell"></div>
+                            <div class="ship-cell"></div>
+                        </div>
+                    </div>
+                    <div class="coord-container">
+                        <div class="coord-div">
+                            <h6>X</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="battleship" coord="x" value="1" disabled/>
+                        </div>
+                        <div class="coord-div">
+                            <h6>Y</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="battleship" coord="y" value="2" disabled/>
+                        </div>
+                        <div class="rotate-div">
+                            <h6 style="color:white;">.</h6>
+                            <button class="rotate-button" ship="battleship" disabled>⟳</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ship-container">
+                    <div class="ship-div">
+                        <h6>Destroyer</h6>
+                        <div class="ship">
+                            <div class="ship-cell ship-cell-first"></div>
+                            <div class="ship-cell"></div>
+                            <div class="ship-cell"></div>
+                        </div>
+                    </div>
+                    <div class="coord-container">
+                        <div class="coord-div">
+                            <h6>X</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="destroyer" coord="x" value="1" disabled/>
+                        </div>
+                        <div class="coord-div">
+                            <h6>Y</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="destroyer" coord="y" value="3" disabled/>
+                        </div>
+                        <div class="rotate-div">
+                            <h6 style="color:white;">.</h6>
+                            <button class="rotate-button" ship="destroyer" disabled>⟳</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ship-container">
+                    <div class="ship-div">
+                        <h6>Submarine</h6>
+                        <div class="ship">
+                            <div class="ship-cell ship-cell-first"></div>
+                            <div class="ship-cell"></div>
+                            <div class="ship-cell"></div>
+                        </div>
+                    </div>
+                    <div class="coord-container">
+                        <div class="coord-div">
+                            <h6>X</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="submarine" coord="x" value="1" disabled/>
+                        </div>
+                        <div class="coord-div">
+                            <h6>Y</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="submarine" coord="y" value="4" disabled/>
+                        </div>
+                        <div class="rotate-div">
+                            <h6 style="color:white;">.</h6>
+                            <button class="rotate-button" ship="submarine" disabled>⟳</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ship-container">
+                    <div class="ship-div">
+                        <h6>Patrol Boat</h6>
+                        <div class="ship">
+                            <div class="ship-cell ship-cell-first"></div>
+                            <div class="ship-cell"></div>
+                        </div>
+                    </div>
+                    <div class="coord-container">
+                        <div class="coord-div">
+                            <h6>X</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="patrol" coord="x" value="1" disabled/>
+                        </div>
+                        <div class="coord-div">
+                            <h6>Y</h6>
+                            <input type="number" min="1" max="10" class="ship-coord" ship="patrol" coord="y" value="5" disabled/>
+                        </div>
+                        <div class="rotate-div">
+                            <h6 style="color:white;">.</h6>
+                            <button class="rotate-button" ship="patrol" disabled>⟳</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button id="start-button" class="game-button" hidden>Start Game</button>
+                </div>
+            </div>
         </div>
     </div>
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>

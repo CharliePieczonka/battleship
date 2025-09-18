@@ -1,10 +1,12 @@
 import "./styles.css";
 import { Player } from "./player.js"
 
+let ships = [5, 4, 3, 3, 2];
+let shipNames = ["carrier", "battleship", "destroyer", "submarine", "patrol"]
+
 const gameController = (function () {
-    let ships = [5, 4, 3, 3, 2];
     let player1, computer;
-    let isPlayerTurn, isGameOver;
+    let isPlayerTurn, isGameOver, isSetup;
 
     const startGame = () => {
         player1 = new Player();
@@ -13,7 +15,11 @@ const gameController = (function () {
 
         isPlayerTurn = true;
         isGameOver = false;
-        displayController.displayMessage("Player Turn");
+        isSetup = true;
+        displayController.displayMessage("When you are ready, click the start button!");
+        displayController.displayMessage("Please use the controls to move your ships to your desired positions.");
+        displayController.renderPlayerBoard(player1);
+        displayController.renderPlayerShips();
     }
 
     const populateComputerBoard = () => {
@@ -40,7 +46,7 @@ const gameController = (function () {
         cells.forEach(cell => {
             cell.addEventListener('click', () => {
                 console.log(`player clicked cell (${cell.getAttribute('data-row')}, ${cell.getAttribute('data-col')})`);
-                if(isPlayerTurn && !isGameOver) playerTurn(cell);
+                if(isPlayerTurn && !isGameOver && !isSetup) playerTurn(cell);
             });
         });
     }
@@ -80,11 +86,7 @@ const gameController = (function () {
         
     }
 
-    const resetGame = () => {
-
-    }
-
-    return { startGame, populateComputerBoard, resetGame }
+    return { startGame, populateComputerBoard }
 })();
 
 
@@ -92,22 +94,27 @@ const displayController = (function () {
     let gameInfo = document.querySelector(".game-info");
     let computerBoard = document.querySelector(".computer-board");
     let playerBoard = document.querySelector(".player-board");
+    let coordinateInputs = document.querySelectorAll(".ship-coord");
+
+    // event listener so that anytime a coordinate value changes the display is updated
+    coordinateInputs.forEach(input => {
+        input.addEventListener('input', () => {
+            renderPlayerShips();
+        });
+    });
 
     const renderComputerBoard = (computer) => {
         let size = computer.board.size;
         for(let i = size-1; i >= 0; i--) {
             let row = document.createElement("div");
             row.setAttribute("class", "row");
-            row.setAttribute("id", "row-" + i);
             
             for(let j = 0; j < size; j++) {
                 let cell = document.createElement("div");
                 cell.setAttribute("class", "cell");
-                cell.setAttribute("id", "cell-" + i + "-" + j);
                 cell.setAttribute("data-row", i);
                 cell.setAttribute("data-col", j);
 
-                //cell.textContent = "cell-" + i + "-" + j;
                 cell.textContent = computer.board.coordinates[i][j];
                 if(cell.textContent === "0") {
                     cell.textContent = "";
@@ -117,6 +124,63 @@ const displayController = (function () {
             }
 
             computerBoard.appendChild(row);
+        }
+    }
+
+    const renderPlayerBoard = (player) => {
+        let size = player.board.size;
+        for(let i = size-1; i >= 0; i--) {
+            let row = document.createElement("div");
+            row.setAttribute("class", "row");
+            
+            for(let j = 0; j < size; j++) {
+                let cell = document.createElement("div");
+                cell.setAttribute("class", "cell");
+                cell.setAttribute("data-row", i);
+                cell.setAttribute("data-col", j);             
+                row.appendChild(cell);
+            }
+
+            playerBoard.appendChild(row);
+        }
+    }
+
+    // renders the ships on the players board
+    const renderPlayerShips = () => {
+        let playerCells = playerBoard.querySelectorAll(".cell");
+        playerCells.forEach(cell => cell.style.backgroundColor = "white");
+
+        for(let i = 0; i < ships.length; i++) {
+            let shipLength = ships[i];
+            let shipName = shipNames[i];
+            let first = true;
+
+            let xInput = document.querySelector(`input[ship="${shipName}"][coord="x"]`);
+            let yInput = document.querySelector(`input[ship="${shipName}"][coord="y"]`);
+            let xNum = xInput ? Number(xInput.value) - 1 : 0;
+            let yNum = yInput ? Number(yInput.value) - 1 : 0;
+            let currCoord = playerBoard.querySelector(`div[data-row="${yNum}"][data-col="${xNum}"]`); 
+
+            while (shipLength != 0) {
+                if(xNum + shipLength > 10) {
+                    xInput.value = xNum;
+                    xNum--;
+                    currCoord = playerBoard.querySelector(`div[data-row="${yNum}"][data-col="${xNum}"]`); 
+                }
+
+                if(first) {
+                    currCoord.style.backgroundColor = "grey";
+                    first = false;
+                }
+                else {
+                    currCoord.style.backgroundColor = "lightgrey";
+                }
+
+                xNum++; // ships are only horizontal for now; will eventually need to allow rotating and checking that
+                currCoord = playerBoard.querySelector(`div[data-row="${yNum}"][data-col="${xNum}"]`); 
+
+                shipLength--;
+            }
         }
     }
 
@@ -150,12 +214,19 @@ const displayController = (function () {
         computerBoard.innerHTML = "";
     }
 
-    return { renderComputerBoard, displayMessage, displayReset, clearGameInfo }
+    const toggleCoordinateInputs = () => {
+        coordinateInputs.forEach(input => {
+            input.disabled = input.disabled ? false : true;
+        });
+    }
+
+    return { renderComputerBoard, renderPlayerBoard, renderPlayerShips, displayMessage, displayReset, clearGameInfo, toggleCoordinateInputs }
 })();
 
-let startButton = document.querySelector("#start-button")
+let startButton = document.querySelector("#begin-button")
 startButton.addEventListener("click", () => {
     displayController.clearGameInfo();
+    displayController.toggleCoordinateInputs();
     gameController.startGame();
 });
 
