@@ -1,9 +1,9 @@
 import "./styles.css";
 import { Player } from "./player.js"
-import { Ship } from "./ship.js"
 
 let ships = [5, 4, 3, 3, 2];
 let shipNames = ["carrier", "battleship", "destroyer", "submarine", "patrol"]
+let toggleWaitTimes = 0; // 0 = off, 1 = on
 
 const gameController = (function () {
     let player1, computer;
@@ -26,13 +26,14 @@ const gameController = (function () {
     const startGame = () => {
         isSetup = false;
         displayController.clearGameInfo();
-        displayController.hideShips();
+        displayController.toggleHideShips();
         displayController.displayMessage("The Game has begun!");
+        displayController.displayMessage("-------------------------------");
         displayController.displayMessage("It is your turn.");
     }
 
     const populateComputerBoard = () => {
-        console.log("populating computer board...")
+        console.log("populating computer board...");
         let played = 0;
 
         while(played < ships.length) {
@@ -65,21 +66,73 @@ const gameController = (function () {
             let shipLength = ships[i];
             let shipName = shipNames[i];
 
+            let orientationCheckbox = document.querySelector(`.hidden-check[ship="${shipName}"]`); // unchecked = horizontal, checked = vertical
+            let orientation = orientationCheckbox.checked ? "vertical" : "horizontal";
             let xInput = document.querySelector(`input[ship="${shipName}"][coord="x"]`);
             let yInput = document.querySelector(`input[ship="${shipName}"][coord="y"]`);
             let xNum = xInput ? Number(xInput.value) - 1 : 0;
             let yNum = yInput ? Number(yInput.value) - 1 : 0;
 
-            let success = player1.board.playShip(xNum, yNum, shipLength, shipName, 0);
+            let success = player1.board.playShip(xNum, yNum, shipLength, orientation);
             if(success != "success") {
                 player1.board.ships = [];
+                player1.board.setCoordinates(); // clear the coordinates back to all 0s
                 displayController.displayMessage("There is an error with your arrangement: " + success);
                 return false;
             }
         }
         
         // if all ships have been played with no errors detected then the setup phase is over
+        player1.board.printBoard();
         return true;
+    }
+
+    const computerTurn = () => {
+        if(!isGameOver) {
+            let randomX = -1;
+            let randomY = -1;
+            let shipId = "x";
+            
+            // note that this randomly selects from all squares -> as the game goes on this will take longer to find an unchosen square
+            // TODO: keep track of unchosen squares separately and select from that list randomly
+            while(shipId === "x" || shipId === "o") {
+                randomX = Math.floor(Math.random() * player1.board.size);
+                randomY = Math.floor(Math.random() * player1.board.size);
+                shipId = player1.board.coordinates[randomY][randomX]; // [row][col] i.e. y = row, x = col.
+            }
+
+            let playerBoard = document.querySelector(".player-board");
+            let cell = playerBoard.querySelector(`.cell[data-row="${randomY}"][data-col="${randomX}"]`);
+            
+            if(player1.board.receiveAttack(randomY, randomX)) {
+                displayController.displayMessage(`Computer has hit ship ${shipId}!`);
+
+                if(player1.board.ships[shipId-1].isSunk()) {
+                    displayController.displayMessage(`Your ship ${shipId} has sunk!`);
+                }
+
+                if(player1.board.isGameOver()) {
+                    displayController.displayMessage(`All of your ships have been sunk! You Lose!`);
+                    isGameOver = true;
+                    displayController.displayReset();
+                }
+
+                player1.board.coordinates[randomX][randomY] = "x";
+                cell.textContent = "X";
+                cell.style.backgroundColor = "red";
+            }
+            else {
+                displayController.displayMessage('Miss.');
+                player1.board.coordinates[randomX][randomY] = "o";
+                cell.style.backgroundColor = "blue";
+            }
+
+            setTimeout(() => {
+                displayController.displayMessage("-------------------------------");
+                displayController.displayMessage("It is your turn.");
+                isPlayerTurn = true;
+            }, 1000 * toggleWaitTimes);
+        }
     }
 
     const playerTurn = (cell) => {
@@ -113,10 +166,17 @@ const gameController = (function () {
             }
 
             isPlayerTurn = false;
-        }
 
-        const computerTurn = () => {
-            
+            setTimeout(() => {
+                if(!isGameOver) {
+                    displayController.displayMessage("Computer's turn.");
+                }
+            }, 1000 * toggleWaitTimes);
+           
+            let computerThink = 1000 + Math.floor(Math.random() * 2000); // 1000 to wait out the first message, plus anywhere from 0-2 extra seconds of thinking.
+            setTimeout(() => {
+                computerTurn();
+            }, computerThink * toggleWaitTimes);
         }
     }
 
@@ -273,8 +333,9 @@ const displayController = (function () {
         resetButton.addEventListener("click", () => {
             clearGameInfo();
             clearComputerBoard();
-            //clearPlayerBoard();
-            gameController.startGame();
+            clearPlayerBoard();
+            toggleHideShips();
+            gameController.beginSetup();
         });
 
         gameInfo.prepend(resetButton);
@@ -286,6 +347,10 @@ const displayController = (function () {
 
     const clearComputerBoard = () => {
         computerBoard.innerHTML = "";
+    }
+
+    const clearPlayerBoard = () => {
+        playerBoard.innerHTML = "";
     }
 
     const toggleCoordinateInputs = () => {
@@ -300,14 +365,21 @@ const displayController = (function () {
         });
     }
 
-    const hideShips = () => {
+    const toggleHideShips = () => {
         let main = document.querySelector(".main-container");
         let shipsDiv = main.querySelector(".right");
-        main.style.gridTemplateColumns = "2fr 4fr";
-        shipsDiv.hidden = true;
+
+        if(shipsDiv.hidden) {
+            main.style.gridTemplateColumns = "1fr 4fr 2fr";
+            shipsDiv.hidden = false;
+        }
+        else {
+            main.style.gridTemplateColumns = "1fr 3fr";
+            shipsDiv.hidden = true;
+        }
     }
 
-    return { renderComputerBoard, renderPlayerBoard, renderPlayerShips, displayMessage, displayReset, clearGameInfo, toggleCoordinateInputs, hideShips }
+    return { renderComputerBoard, renderPlayerBoard, renderPlayerShips, displayMessage, displayReset, clearGameInfo, toggleCoordinateInputs, toggleHideShips }
 })();
 
 let beginButton = document.querySelector("#begin-button");

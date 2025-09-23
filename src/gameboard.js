@@ -8,12 +8,7 @@ class Gameboard {
     hits = [];
 
     constructor() {
-        for(let i = 0; i < this.size; i++) {
-            this.coordinates[i] = [];
-            for(let j = 0; j < this.size; j++) {
-                this.coordinates[i][j] = 0;
-            }
-        }
+        this.setCoordinates();
     }
 
     playShip(x, y, length, orientation) {
@@ -58,14 +53,14 @@ class Gameboard {
         return "success";
     }
 
-    receiveAttack(x, y) {
-        let shipID = this.coordinates[x][y];
+    receiveAttack(row, col) {
+        let shipID = this.coordinates[row][col];
         if(shipID === 0) {
-            this.missed.push([x, y]);
+            this.missed.push([row, col]);
             return false;
         }
         else {
-            this.hits.push([x, y]);
+            this.hits.push([row, col]);
             this.ships[shipID - 1].numHits++;
             return true;
         }
@@ -87,6 +82,14 @@ class Gameboard {
         }
     }
 
+    setCoordinates() {
+        for(let i = 0; i < this.size; i++) {
+            this.coordinates[i] = [];
+            for(let j = 0; j < this.size; j++) {
+                this.coordinates[i][j] = 0;
+            }
+        }
+    }
     printBoard() {
         for(let i = this.size - 1; i >= 0; i--) {
             console.log(this.coordinates[i].join(" "));

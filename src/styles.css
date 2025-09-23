@@ -13,8 +13,22 @@ body {
 }
 
 .game-button {
-
+    background-color: lightgrey;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.5em;
+    border: none;
+    border-radius: 0.5em;        
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
+
+.game-button:active {
+    transform: scale(0.98);
+    box-shadow: none;
+}
+
 .side-title {
     padding-bottom: 0.5em;
 }
@@ -114,4 +128,8 @@ body {
 
 #start-button {
     margin: 1em;
+}
+
+#reset-button {
+    margin-bottom: 1em;
 }
