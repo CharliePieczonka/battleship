@@ -3,7 +3,7 @@ import { Player } from "./player.js"
 
 let ships = [5, 4, 3, 3, 2];
 let shipNames = ["carrier", "battleship", "destroyer", "submarine", "patrol"]
-let toggleWaitTimes = 0; // 0 = off, 1 = on
+let toggleWaitTimes = 1; // 0 = off, 1 = on
 
 const gameController = (function () {
     let player1, computer;
@@ -117,13 +117,13 @@ const gameController = (function () {
                     displayController.displayReset();
                 }
 
-                player1.board.coordinates[randomX][randomY] = "x";
+                player1.board.coordinates[randomY][randomX] = "x";
                 cell.textContent = "X";
                 cell.style.backgroundColor = "red";
             }
             else {
                 displayController.displayMessage('Miss.');
-                player1.board.coordinates[randomX][randomY] = "o";
+                player1.board.coordinates[randomY][randomX] = "o";
                 cell.style.backgroundColor = "blue";
             }
 
@@ -198,6 +198,23 @@ const displayController = (function () {
         });
     });
 
+    // prevent user from typing into any input, only let them use certain keys or the up/down arrows
+    coordinateInputs.forEach(input => {
+        input.addEventListener("keydown", function (e) {
+        if (
+            e.key === "ArrowUp" ||
+            e.key === "ArrowDown" ||
+            e.key === "Tab"
+        ) {
+            return;
+        }
+
+        // prevent all other key input
+        e.preventDefault();
+        });
+    });
+    
+
     // evenlistener for rotation
     rotateInputs.forEach(input => {
         input.addEventListener('click', () => {
@@ -219,10 +236,11 @@ const displayController = (function () {
                 cell.setAttribute("data-row", i);
                 cell.setAttribute("data-col", j);
 
-                cell.textContent = computer.board.coordinates[i][j];
-                if(cell.textContent === "0") {
-                    cell.textContent = "";
-                }
+                // print computer ship locations
+                // cell.textContent = computer.board.coordinates[i][j];
+                // if(cell.textContent === "0") {
+                //     cell.textContent = "";
+                // }
                 
                 row.appendChild(cell);
             }
@@ -396,6 +414,3 @@ startButton.addEventListener("click", () => {
     let playerBoardOk = gameController.populatePlayerBoard();
     if(playerBoardOk) gameController.startGame();
 });
-
-
-//displayController.testMethod();

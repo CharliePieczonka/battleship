@@ -12,7 +12,7 @@ body {
     padding: 0.5em;
 }
 
-.game-button {
+.game-button, .rotate-button {
     background-color: lightgrey;
     font-size: 1rem;
     font-weight: 500;
@@ -20,12 +20,15 @@ body {
     border: none;
     border-radius: 0.5em;        
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-.game-button:active {
-    transform: scale(0.98);
+.rotate-button {
+    padding: 3px;
+}
+
+.game-button:active, .rotate-button:active {
+    transform: scale(0.95);
     box-shadow: none;
 }
 
@@ -36,6 +39,7 @@ body {
 .game-info {
     overflow-y: auto;
     height: 80vh;
+    min-width: 200px;
 }
 
 .main-container {
@@ -52,15 +56,27 @@ body {
 }
 
 .computer-board-container {
-    border-bottom: 1px solid black;
-    display: flex;
-    justify-content: center;
+    border-bottom: 2px solid black;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.computer-board .row:last-child .cell {
+    border-bottom: none;
+}
+
+.board-title {
+    padding: 1em;
 }
 
 .player-board-container {
-    border-top: 1px solid black;
-    display: flex;
-    justify-content: center;
+    border-top: 2px solid black;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.player-board .row:first-child .cell {
+    border-top: none;
 }
 
 .board {
@@ -69,7 +85,9 @@ body {
 }
 
 .row {
+    --bs-gutter-x: 0;
     display: flex;
+    flex-wrap: nowrap;
     flex: 1;
 }
 
@@ -81,9 +99,9 @@ body {
     align-items: center;
 }
 
-/* .cell:hover {
-    background-color: red;
-} */
+.computer-board .cell:hover {
+    background-color: lightgray;
+}
 
 .ship-container {
     display: flex;
