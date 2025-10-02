@@ -17,8 +17,8 @@ const gameController = (function () {
         isPlayerTurn = true;
         isGameOver = false;
         isSetup = true;
-        displayController.displayMessage("When you are ready, click the start button!");
-        displayController.displayMessage("Please use the controls to move your ships to your desired positions.");
+        displayController.displayMessage("When you are ready, click the start button!", true);
+        displayController.displayMessage("Please use the controls to move your ships to your desired positions.", true);
         displayController.renderPlayerBoard(player1);
         displayController.renderPlayerShips(false);
     }
@@ -27,9 +27,7 @@ const gameController = (function () {
         isSetup = false;
         displayController.clearGameInfo();
         displayController.toggleHideShips();
-        displayController.displayMessage("The Game has begun!");
-        displayController.displayMessage("-------------------------------");
-        displayController.displayMessage("It is your turn.");
+        displayController.displayMessage("The Game has begun!", true);
     }
 
     const populateComputerBoard = () => {
@@ -77,7 +75,7 @@ const gameController = (function () {
             if(success != "success") {
                 player1.board.ships = [];
                 player1.board.setCoordinates(); // clear the coordinates back to all 0s
-                displayController.displayMessage("There is an error with your arrangement: " + success);
+                displayController.displayMessage("There is an error with your arrangement: " + success, false);
                 return false;
             }
         }
@@ -105,33 +103,30 @@ const gameController = (function () {
             let cell = playerBoard.querySelector(`.cell[data-row="${randomY}"][data-col="${randomX}"]`);
             
             if(player1.board.receiveAttack(randomY, randomX)) {
-                displayController.displayMessage(`Computer has hit ship ${shipId}!`);
-
                 if(player1.board.ships[shipId-1].isSunk()) {
-                    displayController.displayMessage(`Your ship ${shipId} has sunk!`);
+                    displayController.displayMessage(`Your ${shipNames[shipId-1]} has sunk!`, false);
                 }
 
                 if(player1.board.isGameOver()) {
-                    displayController.displayMessage(`All of your ships have been sunk! You Lose!`);
+                    displayController.displayMessage(`All of your ships have been sunk! You Lose!`, false);
                     isGameOver = true;
                     displayController.displayReset();
                 }
 
                 player1.board.coordinates[randomY][randomX] = "x";
                 cell.textContent = "X";
-                cell.style.backgroundColor = "red";
+                //cell.style.backgroundColor = "#e57373";
+                cell.classList.toggle("player-hit", true);
             }
             else {
-                displayController.displayMessage('Miss.');
                 player1.board.coordinates[randomY][randomX] = "o";
-                cell.style.backgroundColor = "blue";
+                //cell.style.backgroundColor = "#64b5f6";
+                cell.classList.toggle("miss", true);
             }
 
-            setTimeout(() => {
-                displayController.displayMessage("-------------------------------");
-                displayController.displayMessage("It is your turn.");
-                isPlayerTurn = true;
-            }, 1000 * toggleWaitTimes);
+            cell.classList.toggle("empty", false);
+            isPlayerTurn = true;
+
         }
     }
 
@@ -143,40 +138,31 @@ const gameController = (function () {
 
         if(shipId != "x" && shipId != "o") {
             if(computer.board.receiveAttack(row, col)) {
-                displayController.displayMessage(`Player has hit battleship ${shipId}!`);
-
                 if(computer.board.ships[shipId-1].isSunk()) {
-                    displayController.displayMessage(`Computer ship ${shipId} has sunk!`);
+                    displayController.displayMessage(`You have sunk the computer's ${shipNames[shipId-1]}!`, true);
                 }
 
                 if(computer.board.isGameOver()) {
-                    displayController.displayMessage(`All computer ships have been sunk! You Win!`);
+                    displayController.displayMessage(`All computer ships have been sunk! You Win!`,);
                     isGameOver = true;
                     displayController.displayReset();
                 }
 
                 computer.board.coordinates[row][col] = "x";
                 cell.textContent = "X";
-                cell.style.backgroundColor = "red";
+                cell.classList.toggle("hit", true);
             }
             else {
-                displayController.displayMessage('Miss.');
                 computer.board.coordinates[row][col] = "o";
-                cell.style.backgroundColor = "blue";
+                cell.classList.toggle("miss", true);
             }
 
-            isPlayerTurn = false;
+            cell.classList.toggle("empty", false);
 
-            setTimeout(() => {
-                if(!isGameOver) {
-                    displayController.displayMessage("Computer's turn.");
-                }
-            }, 1000 * toggleWaitTimes);
-           
-            let computerThink = 1000 + Math.floor(Math.random() * 2000); // 1000 to wait out the first message, plus anywhere from 0-2 extra seconds of thinking.
+            isPlayerTurn = false;
             setTimeout(() => {
                 computerTurn();
-            }, computerThink * toggleWaitTimes);
+            }, 1000 * toggleWaitTimes);
         }
     }
 
@@ -232,7 +218,7 @@ const displayController = (function () {
             
             for(let j = 0; j < size; j++) {
                 let cell = document.createElement("div");
-                cell.setAttribute("class", "cell");
+                cell.setAttribute("class", "cell empty");
                 cell.setAttribute("data-row", i);
                 cell.setAttribute("data-col", j);
 
@@ -257,9 +243,9 @@ const displayController = (function () {
             
             for(let j = 0; j < size; j++) {
                 let cell = document.createElement("div");
-                cell.setAttribute("class", "cell");
+                cell.setAttribute("class", "cell empty");
                 cell.setAttribute("data-row", i);
-                cell.setAttribute("data-col", j);             
+                cell.setAttribute("data-col", j);   
                 row.appendChild(cell);
             }
 
@@ -271,23 +257,25 @@ const displayController = (function () {
     const renderPlayerShips = (rotated) => {
         // blank slate
         let playerCells = playerBoard.querySelectorAll(".cell");
-        playerCells.forEach(cell => cell.style.backgroundColor = "white");
+        playerCells.forEach(cell => cell.style.backgroundColor = "");
+        playerCells.forEach(cell => cell.classList.toggle("ship-cell", false));
 
         // for each ship
         for(let i = 0; i < ships.length; i++) {
             let shipLength = ships[i];
             let shipName = shipNames[i];
-            let first = true;
 
             let xInput = document.querySelector(`input[ship="${shipName}"][coord="x"]`);
             let yInput = document.querySelector(`input[ship="${shipName}"][coord="y"]`);
             let xNum = xInput ? Number(xInput.value) - 1 : 0;
             let yNum = yInput ? Number(yInput.value) - 1 : 0;
             let orientation = document.querySelector(`.hidden-check[ship="${shipName}"]`); // unchecked = horizontal, checked = vertical
-            let currCoord = playerBoard.querySelector(`div[data-row="${yNum}"][data-col="${xNum}"]`); 
+            let currCoord = playerBoard.querySelector(`div[data-row="${yNum}"][data-col="${xNum}"]`);
 
             // from the starting cell, iterate over the length of the ship colouring in each one
             while (shipLength != 0) {
+                currCoord.classList.toggle("ship-cell", true);
+
                 if(rotated) {
                     // if the last movement was a rotation, and now the piece is out of bounds, untoggle the rotation and render it as it was before
                     if(xNum + shipLength > 10 && !orientation.checked) {
@@ -304,24 +292,17 @@ const displayController = (function () {
                         xInput.value = xNum;
                         xNum--;
                         currCoord = playerBoard.querySelector(`div[data-row="${yNum}"][data-col="${xNum}"]`); 
+                        currCoord.classList.toggle("ship-cell", true);
                     }
 
                     if(yNum + shipLength > 10 && orientation.checked) {
                         yInput.value = yNum;
                         yNum--;
                         currCoord = playerBoard.querySelector(`div[data-row="${yNum}"][data-col="${xNum}"]`); 
+                        currCoord.classList.toggle("ship-cell", true);
                     }
                 }
                 
-                // TODO: pick different colours for the ships
-                if(first) {
-                    currCoord.style.backgroundColor = "grey";
-                    first = false;
-                }
-                else {
-                    currCoord.style.backgroundColor = "lightgrey";
-                }
-
                 // drawing direction
                 if(!orientation.checked) {
                     xNum++;
@@ -336,8 +317,14 @@ const displayController = (function () {
         }
     }
 
-    const displayMessage = (message) => {
+    const displayMessage = (message, isPlayer) => {
         let newMsg = document.createElement("p");
+        if(isPlayer) {
+            newMsg.setAttribute("class", "log log-player");
+        }
+        else {
+            newMsg.setAttribute("class", "log log-computer");
+        }
         newMsg.innerText = message;
         gameInfo.prepend(newMsg);
     }

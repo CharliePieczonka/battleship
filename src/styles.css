@@ -6,21 +6,31 @@
 
 body {
     height: 100vh;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+.main-container {
+    background-color: #f5f5f5;
 }
 
 .left, .right {
     padding: 0.5em;
 }
 
+#begin-button {
+    margin-top: 1em;
+}
+
 .game-button, .rotate-button {
-    background-color: lightgrey;
-    font-size: 1rem;
-    font-weight: 500;
-    padding: 0.5em;
+    background: linear-gradient(to bottom, #42a5f5, #1e88e5);
+    color: white;
+    font-weight: bold;
     border: none;
-    border-radius: 0.5em;        
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 1rem;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .rotate-button {
@@ -33,13 +43,34 @@ body {
 }
 
 .side-title {
-    padding-bottom: 0.5em;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e88e5;
+    border-bottom: solid #ccc;
+    padding-bottom: 5px;
+    margin-bottom: 0.5em;
 }
 
 .game-info {
     overflow-y: auto;
     height: 80vh;
     min-width: 200px;
+}
+
+.log {
+  background: #fafafa;
+  padding: 8px;
+  margin-bottom: 6px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.log-player {
+    border-left: 4px solid #64b5f6;
+}
+
+.log-computer {
+    border-left: 4px solid #e57373;
 }
 
 .main-container {
@@ -49,14 +80,22 @@ body {
 }
 
 .boards-container {
-    border-left: 1px solid black;
-    border-right: 1px solid black;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
     display: grid;
     grid-template-rows: 1fr 1fr;
+    background: linear-gradient(180deg, #e3f2fd, #ffffff);
+}
+
+h5 {
+    border-bottom: 2px solid #90caf9;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.75rem;
+    color: #1e88e5;
 }
 
 .computer-board-container {
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid #ccc;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
 }
@@ -66,11 +105,18 @@ body {
 }
 
 .board-title {
+    flex-wrap: nowrap;
+    flex: 1;
     padding: 1em;
+    min-width: 130px;
+}
+
+.board-right {
+    flex-shrink: 2;
 }
 
 .player-board-container {
-    border-top: 2px solid black;
+    border-top: 2px solid #ccc;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
 }
@@ -92,21 +138,37 @@ body {
 }
 
 .cell {
-    border: 1px solid black;
+    border: 1px solid #ccc;
     width: 3em;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: white;
 }
 
-.computer-board .cell:hover {
+.ship-cell {
+    background: linear-gradient(to bottom, #b0bec5, #455a64);
+    border-radius: 4px;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.4);
+}
+
+.empty {
+    background-color: white;
+}
+
+.computer-board .cell:hover:is(.empty) {
     background-color: lightgray;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
 }
 
 .ship-container {
     display: flex;
     justify-content: space-between;
-    padding: 1em;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 10px;
 }
 
 .ship {
@@ -114,15 +176,32 @@ body {
     align-items: center;
 }
 
-.ship-cell {
+.right .ship-cell {
     height: 2em;
     width: 2em;
-    background-color: lightgrey;
-    border: 1px solid black;
+    background-color: grey;
+    border: 1px solid #ccc;
 }
 
 .ship-cell-first {
     background-color: grey;
+}
+
+.hit {
+  background-color: #e57373;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
+  transition: background-color 0.3s ease;
+}
+
+.player-hit {
+    background: #e57373 !important;
+    transition: background-color 0.3s ease;
+}
+
+.miss {
+  background-color: #64b5f6;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
 }
 
 .coord-container {
@@ -145,7 +224,7 @@ body {
 }
 
 #start-button {
-    margin: 1em;
+    margin: 0.5em 0;
 }
 
 #reset-button {
