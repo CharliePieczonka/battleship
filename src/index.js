@@ -8,6 +8,13 @@ let toggleWaitTimes = 1; // 0 = off, 1 = on
 const gameController = (function () {
     let player1, computer;
     let isPlayerTurn, isGameOver, isSetup;
+    let computerMemory;
+    let computerMemoryCoords;
+
+    // testing
+    let firstMove = false; // set true to set computer's first move
+    let firstX = 6;
+    let firstY = 0;
     
     const beginSetup = () => {
         player1 = new Player();
@@ -17,6 +24,10 @@ const gameController = (function () {
         isPlayerTurn = true;
         isGameOver = false;
         isSetup = true;
+
+        computerMemory = [];
+        computerMemoryCoords = [];
+
         displayController.displayMessage("When you are ready, click the start button!", true);
         displayController.displayMessage("Please use the controls to move your ships to your desired positions.", true);
         displayController.renderPlayerBoard(player1);
@@ -87,24 +98,157 @@ const gameController = (function () {
 
     const computerTurn = () => {
         if(!isGameOver) {
-            let randomX = -1;
-            let randomY = -1;
+            let choiceX = -1;
+            let choiceY = -1;
             let shipId = "x";
-            
-            // note that this randomly selects from all squares -> as the game goes on this will take longer to find an unchosen square
-            // TODO: keep track of unchosen squares separately and select from that list randomly
-            while(shipId === "x" || shipId === "o") {
-                randomX = Math.floor(Math.random() * player1.board.size);
-                randomY = Math.floor(Math.random() * player1.board.size);
-                shipId = player1.board.coordinates[randomY][randomX]; // [row][col] i.e. y = row, x = col.
+
+            let hitIndex = -1;
+            let hitIndex2 = -1;
+            let directionsTried = 0;
+
+            let numHits = computerMemory.filter((value) => value === 'hit').length
+
+            if(numHits > 1) {
+                // computer has at least 2 hits
+                hitIndex = computerMemory.indexOf('hit');
+
+                if(hitIndex != 0) {
+                    // hit water but not sunk a boat, reverse the search direction
+                    computerMemory.reverse();
+                    computerMemoryCoords.reverse();
+                    hitIndex = computerMemory.indexOf('hit');
+                }
+
+                // find the second hit index
+                for(let j = hitIndex + 1; j < computerMemory.length; j++) {
+                    if(computerMemory[j] == 'hit') {
+                        hitIndex2 = j;
+                        break;
+                    }
+                }
+
+                let lastCoord = computerMemoryCoords[hitIndex];
+                let prevCoord = computerMemoryCoords[hitIndex2];
+
+                // check if the last two recorded hits are beside each other to keep in that direction
+                if(Math.abs(lastCoord.x - prevCoord.x) == 1) {
+                    if(lastCoord.x > prevCoord.x) {
+                        choiceX = lastCoord.x + 1;
+                        choiceY = lastCoord.y;
+                    }
+                    else {
+                        choiceX = lastCoord.x - 1;
+                        choiceY = lastCoord.y;
+                    }
+
+                    shipId = player1.board.coordinates[choiceY][choiceX];
+                }
+                else if(Math.abs(lastCoord.y - prevCoord.y) == 1) {
+                    if(lastCoord.y > prevCoord.y) {
+                        choiceX = lastCoord.x;
+                        choiceY = lastCoord.y + 1;
+                    }
+                    else {
+                        choiceX = lastCoord.x;
+                        choiceY = lastCoord.y - 1;
+                    }
+
+                    try {
+                        shipId = player1.board.coordinates[choiceY][choiceX];
+                    }
+                    catch {
+                        // in case negative out of bounds
+                        shipId = 'x';
+                    }
+                    
+                }
+                else {
+                    // if the last two hits are not beside each other then a direction cannot be established, search adjacent 
+                    shipId = 'x';
+                }
+
+                if (typeof shipId == 'undefined') {
+                    shipId = 'x'; // coordinate was out of bounds positively, search adjacent
+                }
+            }
+
+            if(numHits >= 1 && (shipId == 'x' || shipId =='o')) {
+                // computer has gotten 1 hit from a random selection, or the directional search fell through
+                // check the adjacent tiles of the most recent hit for an open cell
+                hitIndex = computerMemory.indexOf('hit');
+                directionsTried = 0;
+
+                // randomly choose order of adjacent cells to check
+                const directions = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+
+                let lastCoord = computerMemoryCoords[hitIndex];
+                while((shipId == "x" || shipId == "o") && directionsTried != 4) {
+                    switch(directions[directionsTried]) {
+                        case 0:
+                            choiceX = lastCoord.x + 1;
+                            choiceY = lastCoord.y;
+                            break;
+                        case 1: 
+                            choiceX = lastCoord.x - 1;
+                            choiceY = lastCoord.y;
+                            break;
+                        case 2:
+                            choiceX = lastCoord.x;
+                            choiceY = lastCoord.y + 1;
+                            break;
+                        case 3:
+                            choiceX = lastCoord.x;
+                            choiceY = lastCoord.y - 1;
+                            break;
+                    }
+
+                    try {
+                        shipId = player1.board.coordinates[choiceY][choiceX];
+                    }
+                    catch {
+                        shipId = 'x' // coordinate was out of bounds negatively, reset it
+                    }
+
+                    if (typeof shipId == 'undefined') {
+                        shipId = 'x'; // coordinate was out of bounds positively, reset it
+                    }
+
+                    directionsTried++;
+                }
+            }
+
+            if(hitIndex == -1 || directionsTried == 4) {       
+                if(firstMove) {
+                    // choose first move for testing
+                    choiceX = firstX;
+                    choiceY = firstY;
+                    shipId = player1.board.coordinates[choiceY][choiceX];
+                    firstMove = false;
+                }
+                else {
+                    // randomly selects from all squares
+                    while(shipId === "x" || shipId === "o") {
+                        choiceX = Math.floor(Math.random() * player1.board.size);
+                        choiceY = Math.floor(Math.random() * player1.board.size);
+                        shipId = player1.board.coordinates[choiceY][choiceX]; // [row][col] i.e. y = row, x = col.
+                    }
+                }
             }
 
             let playerBoard = document.querySelector(".player-board");
-            let cell = playerBoard.querySelector(`.cell[data-row="${randomY}"][data-col="${randomX}"]`);
+            let cell = playerBoard.querySelector(`.cell[data-row="${choiceY}"][data-col="${choiceX}"]`);
+
+            computerMemoryCoords.unshift({ x: choiceX, y: choiceY })
             
-            if(player1.board.receiveAttack(randomY, randomX)) {
+            if(player1.board.receiveAttack(choiceY, choiceX)) {
+                computerMemory.unshift("hit");
+
                 if(player1.board.ships[shipId-1].isSunk()) {
                     displayController.displayMessage(`Your ${shipNames[shipId-1]} has sunk!`, false);
+                    
+                    // clear memory when a ship sinks
+                    computerMemory = [];
+                    computerMemoryCoords = [];
                 }
 
                 if(player1.board.isGameOver()) {
@@ -113,20 +257,18 @@ const gameController = (function () {
                     displayController.displayReset();
                 }
 
-                player1.board.coordinates[randomY][randomX] = "x";
+                player1.board.coordinates[choiceY][choiceX] = "x";
                 cell.textContent = "X";
-                //cell.style.backgroundColor = "#e57373";
                 cell.classList.toggle("player-hit", true);
             }
             else {
-                player1.board.coordinates[randomY][randomX] = "o";
-                //cell.style.backgroundColor = "#64b5f6";
+                player1.board.coordinates[choiceY][choiceX] = "o";
+                computerMemory.unshift("miss");
                 cell.classList.toggle("miss", true);
             }
 
             cell.classList.toggle("empty", false);
             isPlayerTurn = true;
-
         }
     }
 
